@@ -22,6 +22,7 @@ usage() {
     echo "Commands:"
     echo "    replace       Replace the contents in the files"
     echo "    json          Json pretty print (The json string should be inside the single quotes)"
+    echo "    count         Count the number of lines in a file or directory"
     echo
     echo "Use "$SCRIPT_NAME [command] --help" for more information about a command."
     echo
@@ -98,9 +99,8 @@ replace() {
     echo "Notice: The modified file is backed up in the file ending with suffix .bak!"
 }
 
-
 replace_usage() {
-    echo "Usage: $SCRIPT_NAME replace option"
+    echo "Usage: $SCRIPT_NAME replace <option>"
     echo
     echo "Options:"
     echo "    -d    Specify a directory"
@@ -109,6 +109,52 @@ replace_usage() {
     echo
     echo "i.e."
     echo "    $SCRIPT_NAME replace -d /tmp/ -f \"from\" -t \"to\""
+    echo
+}
+
+# count the number of lines in a file or directory.
+count() {
+    if [ $# -eq 0 ];then
+        count_usage; exit
+    fi
+
+    while getopts :h opt; do
+        case $opt in
+            h) count_usage; exit ;;
+        esac
+    done
+
+    FILE=$1
+    EXTENSION=${2:-"c|h|cc"}
+    EXTENSION=${EXTENSION//|/ }
+    OPTION=""
+    for e in $EXTENSION; do
+        if [ -z "$OPTION" ]; then
+            OPTION=" -name \"*.$e\"";
+        else
+            OPTION="$OPTION -o -name \"*.$e\"";
+        fi
+    done
+
+    if [ -d $FILE ]; then
+        CMD="find $FILE$OPTION";
+        NUM=`eval $CMD | xargs sed -e "/^[ \t ]*\/\//d" -e "s/\/\/[^\"]*//" -e "s/\/\*.*\*\///" -e "/^[ \t  ]*\/\*/,/.*\*\//d" | grep -v '^[[:space:]]*$' | wc -l`;
+        echo "Total: $NUM lines";
+    elif [ -f $FILE ]; then
+        NUM=`sed -e "/^[ \t]*\/\//d" -e "s/\/\/[^\"]*//" -e "s/\/\*.*\*\///" -e "/^[ \t ]*\/\*/,/.*\*\//d" ${FILE}| grep -v '^[[:space:]]*$' | wc -l`;
+        echo "$FILE: $NUM lines";
+    else
+        echo "$FILE is neither file nor directory!"; exit;
+    fi
+}
+
+count_usage() {
+    echo "Usage: $SCRIPT_NAME count <dir|file> [file suffix]"
+    echo
+    echo "i.e."
+    echo "    $SCRIPT_NAME count /path/to/count/"
+    echo "    $SCRIPT_NAME count /path/to/count.php"
+    echo "    $SCRIPT_NAME count /path/to/count/ c|cc|php|java"
     echo
 }
 
@@ -129,6 +175,7 @@ if [ -n "$arg"  ]; then
         -V|--version) version; exit ;;
         replace) replace $@; exit ;;
         json) json $@; exit ;;
+        count) count $@; exit ;;
         *) usage; exit ;;
     esac
 else
