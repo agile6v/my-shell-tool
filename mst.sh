@@ -13,7 +13,7 @@ SCRIPT_NAME=`basename $0`
 usage() {
     version;
     echo
-    echo "Usage: $SCRIPT_NAME [command|option]"
+    echo "Usage: $SCRIPT_NAME <command|option>"
     echo
     echo "Options:"
     echo "    -V, --version    Print program version"
@@ -22,7 +22,8 @@ usage() {
     echo "Commands:"
     echo "    replace       Replace the contents in the files"
     echo "    json          Json pretty print (The json string should be inside the single quotes)"
-    echo "    count         Count the number of lines in a file or directory"
+    echo "    count         Count the lines of code in a file or directory"
+    echo "    ip            Translate IP address from dotted-decimal address to decimal format and vice versa"
     echo
     echo "Use "$SCRIPT_NAME [command] --help" for more information about a command."
     echo
@@ -149,12 +150,41 @@ count() {
 }
 
 count_usage() {
-    echo "Usage: $SCRIPT_NAME count <dir|file> [file suffix]"
+    echo "Usage: $SCRIPT_NAME count <dir|file> [suffix]"
     echo
     echo "i.e."
     echo "    $SCRIPT_NAME count /path/to/count/"
     echo "    $SCRIPT_NAME count /path/to/count.php"
     echo "    $SCRIPT_NAME count /path/to/count/ c|cc|php|java"
+    echo
+}
+
+ip_conversion() {
+    if [ $# -eq 0 ];then
+        ip_conversion_usage; exit
+    fi
+
+    if [ $1 -ge 0 ] 2>/dev/null; then
+        A=$((($1 & 0xff000000 ) >>24))
+        B=$((($1 & 0x00ff0000)>>16))
+        C=$((($1 & 0x0000ff00)>>8))
+        D=$(($1 & 0x000000ff))
+        echo $A.$B.$C.$D
+    else
+        A=$(echo $1 | cut -d '.' -f1)
+        B=$(echo $1 | cut -d '.' -f2)
+        C=$(echo $1 | cut -d '.' -f3)
+        D=$(echo $1 | cut -d '.' -f4)
+        echo $(($A<<24|$B<<16|$C<<8|$D))
+    fi
+}
+
+ip_conversion_usage() {
+    echo "Usage: $SCRIPT_NAME ip <dotted-decimal address| decimal format>"
+    echo
+    echo "i.e."
+    echo "    $SCRIPT_NAME ip 111.193.53.38"
+    echo "    $SCRIPT_NAME ip 1874933030"
     echo
 }
 
@@ -176,10 +206,10 @@ if [ -n "$arg"  ]; then
         replace) replace $@; exit ;;
         json) json $@; exit ;;
         count) count $@; exit ;;
+        ip) ip_conversion $@; exit ;;
         *) usage; exit ;;
     esac
 else
     usage;
 fi
-
 
