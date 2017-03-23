@@ -23,7 +23,8 @@ usage() {
     echo "    replace       Replace the contents in the files"
     echo "    json          Json pretty print (The json string should be inside the single quotes)"
     echo "    count         Count the lines of code in a file or directory"
-    echo "    ip            Translate IP address from dotted-decimal address to decimal format and vice versa"
+    echo "    ip            Translate IP address from dotted-decimal address to decimal format and vice versa,"
+    echo "                  also support to calculate from CIDR ip address to network & broadcast address"
     echo
     echo "Use "$SCRIPT_NAME [command] --help" for more information about a command."
     echo
@@ -170,6 +171,19 @@ ip_conversion() {
         C=$((($1 & 0x0000ff00)>>8))
         D=$(($1 & 0x000000ff))
         echo $A.$B.$C.$D
+    elif [[  $1 == *"/"*  ]]; then
+        STR=${1//\// }
+        read IP MASK <<< $(echo ${STR})
+        echo "Ip:      $IP"
+        MASK=`cidr2mask $MASK`;
+        echo "Netmask: $MASK";
+        OIFS=$IFS;
+        IFS='.';i=($IP);m=($MASK);
+        NET_ADDR="$((${i[0]} & ${m[0]})).$((${i[1]} & ${m[1]})).$((${i[2]} & ${m[2]})).$((${i[3]} & ${m[3]}))"
+        echo "Network: $NET_ADDR"
+        BROADCAST_ADDR="$((255-${m[0]}+(${i[0]}&${m[0]}))).$((255-${m[1]}+(${i[1]}&${m[1]}))).$((255-${m[2]}+(${i[2]}&${m[2]}))).$((255-${m[3]}+(${i[3]}&${m[3]})))"
+        IFS=$OIFS
+        echo "Broadcast: $BROADCAST_ADDR";
     else
         A=$(echo $1 | cut -d '.' -f1)
         B=$(echo $1 | cut -d '.' -f2)
@@ -179,11 +193,18 @@ ip_conversion() {
     fi
 }
 
+cidr2mask() {
+    set -- $(( 5 - ($1 / 8)  )) 255 255 255 255 $(( (255 << (8 - ($1 % 8))) & 255  )) 0 0 0
+    [ $1 -gt 1  ] && shift $1 || shift
+    echo ${1-0}.${2-0}.${3-0}.${4-0}
+}
+
 ip_conversion_usage() {
     echo "Usage: $SCRIPT_NAME ip <dotted-decimal address| decimal format>"
     echo
     echo "i.e."
     echo "    $SCRIPT_NAME ip 111.193.53.38"
+    echo "    $SCRIPT_NAME ip 111.193.53.38/24"
     echo "    $SCRIPT_NAME ip 1874933030"
     echo
 }
