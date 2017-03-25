@@ -25,6 +25,7 @@ usage() {
     echo "    count         Count the lines of code in a file or directory"
     echo "    ip            Translate IP address from dotted-decimal address to decimal format and vice versa,"
     echo "                  also support to calculate from CIDR ip address to network & broadcast address"
+    echo "    convert       convert arbitrary base to arbitrary base within 2,8,10,16"
     echo
     echo "Use "$SCRIPT_NAME [command] --help" for more information about a command."
     echo
@@ -160,6 +161,51 @@ count_usage() {
     echo
 }
 
+convert() {
+    if [ $# -eq 0 ];then
+        convert_usage; exit
+    fi
+    check_cmd bc;
+
+    local INPUT_TYPE=0
+    local NUMBER=0
+    if [[  $1 != *"#"*  ]]; then
+        INPUT_TYPE=10
+        NUMBER=$1
+    else
+        STR=${1//#/ }
+        read INPUT_TYPE NUMBER <<< $(echo ${STR})
+    fi
+
+    NUMBER=`echo $NUMBER | tr a-z A-Z`
+    if [[  $NUMBER =~ ^0X ]]; then
+        NUMBER=${NUMBER#0X} 
+    fi
+
+    echo "input base = $INPUT_TYPE, number = $NUMBER"
+    echo "__________________________________________"
+
+    echo "2:  "$(echo "obase=2;ibase=$INPUT_TYPE;$NUMBER"|bc)
+    echo ""
+    echo "8:  "$(echo "obase=8;ibase=$INPUT_TYPE;$NUMBER"|bc) 
+    echo ""
+    echo "10: "$(echo "obase=10;ibase=$INPUT_TYPE;$NUMBER"|bc) 
+    echo ""
+    echo "16: "$(echo "obase=16;ibase=$INPUT_TYPE;$NUMBER"|bc)
+}
+
+convert_usage() {
+    echo "Usage: $SCRIPT_NAME convert input_base#number"
+    echo
+    echo "i.e."
+    echo "    $SCRIPT_NAME convert 16#FF"
+    echo "    $SCRIPT_NAME convert 16#0xFF"
+    echo "    $SCRIPT_NAME convert 2#1111"
+    echo "    $SCRIPT_NAME convert 10#100"
+    echo "    $SCRIPT_NAME convert 8#10"
+    echo
+}
+
 ip_conversion() {
     if [ $# -eq 0 ];then
         ip_conversion_usage; exit
@@ -228,6 +274,7 @@ if [ -n "$arg"  ]; then
         json) json $@; exit ;;
         count) count $@; exit ;;
         ip) ip_conversion $@; exit ;;
+        convert) convert $@; exit ;;
         *) usage; exit ;;
     esac
 else
