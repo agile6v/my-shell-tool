@@ -26,6 +26,8 @@ usage() {
     echo "    ip            Translate IP address from dotted-decimal address to decimal format and vice versa,"
     echo "                  also support to calculate from CIDR ip address to network & broadcast address"
     echo "    convert       convert arbitrary base to arbitrary base within 2,8,10,16"
+    echo "    urlencode     encode url string"
+    echo "    urldecode     decode url string"
     echo
     echo "Use "$SCRIPT_NAME [command] --help" for more information about a command."
     echo
@@ -255,6 +257,43 @@ ip_conversion_usage() {
     echo
 }
 
+urlencode() {
+    if [ $# -eq 0 ];then
+        url_encode_decode_usage urlencode 'hello world'; exit
+    fi
+    old_lc_collate=$LC_COLLATE
+    LC_COLLATE=C
+    INPUT=$*
+    local length="${#INPUT}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${INPUT:i:1}"
+        case $c in
+            [a-zA-Z0-9.~_-]) printf "$c" ;;
+            *) printf "$c" | xxd -p -c1 | while read x;do printf "%%%s" "$x"; done
+        esac
+    done
+    echo "";
+    
+    LC_COLLATE=$old_lc_collate
+}
+
+urldecode() {
+    if [ $# -eq 0 ];then
+        url_encode_decode_usage urldecode 'hello%20world'; exit
+    fi
+    local url_encoded="${1//+/ }"
+    printf '%b' "${url_encoded//%/\\x}"
+    echo ""
+}
+
+url_encode_decode_usage() {
+    echo "Usage: $SCRIPT_NAME $1 string"
+    echo
+    echo "i.e."
+    echo "    $SCRIPT_NAME $1 $2"
+    echo
+}
+
 check_cmd() {
     FOUND=`command -v $1`
     if [ -z $FOUND ]; then
@@ -275,6 +314,8 @@ if [ -n "$arg"  ]; then
         count) count $@; exit ;;
         ip) ip_conversion $@; exit ;;
         convert) convert $@; exit ;;
+        urlencode) urlencode $@; exit ;;
+        urldecode) urldecode $@; exit ;;
         *) usage; exit ;;
     esac
 else
