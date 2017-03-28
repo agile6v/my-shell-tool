@@ -28,6 +28,7 @@ usage() {
     echo "    convert       convert arbitrary base to arbitrary base within 2,8,10,16"
     echo "    urlencode     encode url string"
     echo "    urldecode     decode url string"
+    echo "    calc          calculator"
     echo
     echo "Use "$SCRIPT_NAME [command] --help" for more information about a command."
     echo
@@ -294,6 +295,28 @@ url_encode_decode_usage() {
     echo
 }
 
+calc() {
+    if [ $# -eq 0 ];then
+        calc_usage; exit
+    fi
+
+    echo $(echo "$*"|bc)
+}
+
+calc_usage() {
+    echo "Usage: $SCRIPT_NAME calc expression"
+    echo
+    echo "i.e."
+    echo "    $SCRIPT_NAME calc 3*5 or \"3 * 5\""
+    echo "    $SCRIPT_NAME calc 3+5"
+    echo "    $SCRIPT_NAME calc 3-5"
+    echo "    $SCRIPT_NAME calc 3/5"
+    echo "    $SCRIPT_NAME calc 5%3"
+    echo "    $SCRIPT_NAME calc 5^3"
+    echo "    $SCRIPT_NAME calc 5.1-2*2"
+    echo
+}
+
 check_cmd() {
     FOUND=`command -v $1`
     if [ -z $FOUND ]; then
@@ -316,6 +339,7 @@ if [ -n "$arg"  ]; then
         convert) convert $@; exit ;;
         urlencode) urlencode $@; exit ;;
         urldecode) urldecode $@; exit ;;
+        calc) calc "$@"; exit ;;
         *) usage; exit ;;
     esac
 else
