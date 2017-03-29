@@ -14,7 +14,7 @@ Usage: mst.sh <command|option>
 ```
 Options:
     -V, --version    Print program version
-        -h, --help       Print help
+    -h, --help       Print help
 
 Commands:
     replace       Replace the contents in the files
