@@ -8,8 +8,10 @@ Please make sure your system $PATH includes "/usr/local/bin/".
 sudo sh -c "curl https://raw.githubusercontent.com/agile6v/my-shell-tool/master/mst.sh -o /usr/local/bin/mst && chmod +x /usr/local/bin/mst"
 ```
 
+## Usage
 Usage: mst.sh <command|option>
 
+```
 Options:
     -V, --version    Print program version
         -h, --help       Print help
@@ -24,4 +26,5 @@ Commands:
     urlencode     encode url string
     urldecode     decode url string
     calc          calculator
+```
 
