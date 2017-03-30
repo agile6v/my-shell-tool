@@ -1,6 +1,6 @@
 # my-shell-tool
 
-## INSTALL
+## Install
 
 Please make sure your system $PATH includes "/usr/local/bin/". 
 
@@ -26,5 +26,7 @@ Commands:
     urlencode     encode url string
     urldecode     decode url string
     calc          calculator
+    
+Use mst.sh [command] --help for more information about a command.
 ```
 
