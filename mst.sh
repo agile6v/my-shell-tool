@@ -109,7 +109,7 @@ replace_usage() {
     echo "Usage: $SCRIPT_NAME replace <option>"
     echo
     echo "Options:"
-    echo "    -d    Specify a directory"
+    echo "    -d    Specify a directory or a file"
     echo "    -f    A string to serach"
     echo "    -t    A string to replace"
     echo
